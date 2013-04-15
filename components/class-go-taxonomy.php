@@ -7,6 +7,8 @@ class GO_Taxonomy
 	public function __construct()
 	{
 		add_action( 'init', array( $this, 'init' ) );
+
+		$this->config( apply_filters( 'go_config', false, 'go-taxonomy' ) );
 	}//end __construct
 
 	/**
@@ -51,18 +53,13 @@ class GO_Taxonomy
 	}//end register
 }//end class
 
-function go_taxonomy( $config = null )
+function go_taxonomy()
 {
 	global $go_taxonomy;
 
 	if ( ! isset( $go_taxonomy ) || ! $go_taxonomy )
 	{
 		$go_taxonomy = new GO_Taxonomy;
-
-		if ( $config )
-		{
-			$go_taxonomy->config( $config );
-		}//end if
 	}//end if
 
 	return $go_taxonomy;
