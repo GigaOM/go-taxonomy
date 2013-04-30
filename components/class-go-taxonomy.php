@@ -6,7 +6,7 @@ class GO_Taxonomy
 
 	public function __construct()
 	{
-		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'init', array( $this, 'init' ), 1 );
 
 		$this->config( apply_filters( 'go_config', false, 'go-taxonomy' ) );
 	}//end __construct
