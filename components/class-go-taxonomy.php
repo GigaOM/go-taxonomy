@@ -51,6 +51,32 @@ class GO_Taxonomy
 			);
 		}//end foreach
 	}//end register
+
+	/**
+	 * sort array of terms by count
+	 */
+	public function sort_terms( $terms )
+	{
+		usort( $terms, array( $this, 'count_compare' ) );
+	}//end sort_terms
+
+	/**
+	 * compare the count attributes on two objects
+	 */
+	private function count_compare( $a, $b )
+	{
+		if ( ! is_object( $a ) || ! is_object( $b ) )
+		{
+			return 0;
+		}// end if
+
+		if ( $a->count == $b->count )
+		{
+			return 0;
+		}// end if
+
+		return ( $a->count > $b->count ) ? -1 : 1;
+	}//end count_compare
 }//end class
 
 function go_taxonomy()
