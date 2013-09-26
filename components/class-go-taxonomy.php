@@ -57,6 +57,11 @@ class GO_Taxonomy
 	 */
 	public function sort_terms( $terms )
 	{
+		if ( ! is_array( $terms ) )
+		{
+			return;
+		}// end if
+
 		usort( $terms, array( $this, 'count_compare' ) );
 	}//end sort_terms
 
