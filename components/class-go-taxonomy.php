@@ -7,6 +7,7 @@ class GO_Taxonomy
 	public function __construct()
 	{
 		add_action( 'init', array( $this, 'init' ), 1 );
+		add_filter( 'the_category_rss', array( $this, 'filter_category_rss' ) );
 
 		$this->config( apply_filters( 'go_config', false, 'go-taxonomy' ) );
 	}//end __construct
@@ -82,6 +83,18 @@ class GO_Taxonomy
 
 		return ( $a->count > $b->count ) ? -1 : 1;
 	}//end count_compare
+
+	/**
+	 * @uses apply_filters() Calls 'the_category_rss' with category parameter
+	 * adds domain attributes to category element
+	 */
+	public function filter_category_rss( $category )
+	{
+		// wp call to get the taxonomy, 
+		// then get tax term_name, 
+		// then return that in the rss as follows: <category domain="$base_url_for_taxonomy">$term_name</category>
+		return '';
+	}//end filter_category_rss
 }//end class
 
 function go_taxonomy()
