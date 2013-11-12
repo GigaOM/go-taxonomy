@@ -7,9 +7,8 @@ class GO_Taxonomy
 	public function __construct()
 	{
 		add_action( 'init', array( $this, 'init' ), 1 );
-		add_filter( 'the_category_rss', array( $this, 'filter_category_rss' ) );
-
 		$this->config( apply_filters( 'go_config', false, 'go-taxonomy' ) );
+		add_filter( 'the_category_rss', array( $this, 'the_category_rss' ) );
 	}//end __construct
 
 	/**
@@ -88,13 +87,53 @@ class GO_Taxonomy
 	 * @uses apply_filters() Calls 'the_category_rss' with category parameter
 	 * adds domain attributes to category element
 	 */
-	public function filter_category_rss( $category )
+	public function the_category_rss( $category )
 	{
-		// wp call to get the taxonomy, 
-		// then get tax term_name, 
-		// then return that in the rss as follows: <category domain="$base_url_for_taxonomy">$term_name</category>
-		return '';
-	}//end filter_category_rss
+		// get the taxonomy from the post:
+		$post_id = get_the_ID();
+
+		if ( $post_id > 1 )
+		{
+			$out = '';
+			// get url to use in <category domain> attribute, per this format <category domain="$base_url_for_taxonomy/$tax_name">$term_name</category>
+			$url = untrailingslashit( go_local_scriblio_authority()->options['search_host'] );
+			// get the taxonomies to find terms for, from current config:
+			foreach ( array_keys( $this->config ) as $tax ) 
+			{
+				$term_objs = wp_get_object_terms( $post_id, $tax );
+				if( ! empty( $term_objs ) )
+				{
+					if( ! is_wp_error( $term_objs ) )
+					{
+						foreach( $term_objs as $term_obj )
+						{
+							// then get tax term_name:
+							$terms[] = $term_obj->name;
+							// return in the rss in spec'd format:
+							$final_url = '<category domain="' . $url . '/' . $tax . '/' . $term_obj->slug . '">' . $term_obj->name . '</category>';
+							$out .= $final_url;
+						}// end foreach
+					}
+					else 
+					{
+						// no op
+						//wlog('wp_get_object_terms( $post_id, category ) returned error...');
+					}
+				}
+				else 
+				{
+					// no op
+					//wlog('wp_get_object_terms( $post_id, category ) empty...');
+				}
+			}
+		}
+		else
+		{	// get_the_ID returned a dodgy post ID for this item, return nothing:
+			return '';
+		}
+
+		return $out;
+	}//end the_category_rss
 }//end class
 
 function go_taxonomy()
