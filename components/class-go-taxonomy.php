@@ -8,7 +8,7 @@ class GO_Taxonomy
 	{
 		add_action( 'init', array( $this, 'init' ), 1 );
 		$this->config( apply_filters( 'go_config', false, 'go-taxonomy' ) );
-		add_filter( 'the_category_rss', array( $this, 'the_category_rss' ) );
+		add_filter( 'the_category_rss', array( $this, 'the_category_rss' ), 10, 2 );
 	}//end __construct
 
 	/**
@@ -84,7 +84,7 @@ class GO_Taxonomy
 	}//end count_compare
 
 	/**
-	 * @uses apply_filters() Calls 'the_category_rss' with category parameter
+	 * @uses apply_filters() Calls 'the_category_rss' with category & type parameter
 	 * adds domain attributes to category element
 	 */
 	public function the_category_rss( $category, $type )
@@ -96,33 +96,29 @@ class GO_Taxonomy
 		{	// get_the_ID returned a dodgy post ID for this item, return nothing:
 			return '';
 		}
-		else
+
+		$out = '';
+
+		// get the taxonomies to find terms for, from current config:
+		$taxonomies = array_keys($this->config);
+		// use these to obtain term-taxonomy objects:
+		$term_taxonomies = wp_get_object_terms( $post_id, $taxonomies );
+
+		if( empty( $term_taxonomies ) || is_wp_error( $term_taxonomies ) )
 		{
-			$out = '';
+			return $category;
+		}
 
-			// get the taxonomies to find terms for, from current config:
-			$taxonomies = array('company', 'technology', 'vertical', 'analystservices', 'go-type');
-			// use these to obtain term-taxonomy objects:
-			$term_tax_objs = wp_get_object_terms( $post_id, $taxonomies );
-
-			if( ! empty( $term_tax_objs ) && ! is_wp_error( $term_tax_objs ) )
+		foreach( $term_taxonomies as $term )
+		{
+			if ( ! isset( $scheme_url[ $term->taxonomy ] ) )
 			{
-				foreach( $term_tax_objs as $term_tax_obj )
-				{
-					$url = get_term_link( $term_tax_obj );
-					$url_holder = explode('/', $url );
-					array_pop($url_holder); // remove trailing space
-					$label_slug = array_pop($url_holder);
-					$protocol = array_shift($url_holder); // get protocol (future proofing - not nec. required now)
-					array_shift($url_holder); // remove space
-					$url_domain = implode('/', $url_holder);
-
-					// return in the rss in spec'd format:
-					$final_url = '<category domain="' . $protocol . '://' . $url_domain . '/' . '">' . '<![CDATA[' . $term_tax_obj->name . ']]>' . '</category>';
-					$out .= $final_url;
-				}// end foreach
-			}// end if
-		}// end if
+				$scheme_url[ $term->taxonomy ] = preg_replace( '#' . $term->slug . '/?#', '', get_term_link( $term )  );
+			}
+			// return in the rss in spec'd format:
+			$final_url = '<category domain="' . $scheme_url[ $term->taxonomy ] . '">' . '<![CDATA[' . $term->name . ']]>' . '</category>';
+			$out .= $final_url;
+		}// end foreach
 
 		return $out;
 	}//end the_category_rss
