@@ -94,7 +94,7 @@ class GO_Taxonomy
 
 		if ( $post_id < 1 )
 		{	// get_the_ID returned a dodgy post ID for this item, return nothing:
-			return '';
+			return $category;
 		}
 
 		$out = '';
