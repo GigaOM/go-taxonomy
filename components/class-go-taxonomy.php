@@ -116,7 +116,18 @@ class GO_Taxonomy
 				$scheme_url[ $term->taxonomy ] = preg_replace( '#' . $term->slug . '/?#', '', get_term_link( $term )  );
 			}
 			// return in the rss in spec'd format:
-			$final_url = '<category domain="' . $scheme_url[ $term->taxonomy ] . '">' . '<![CDATA[' . $term->name . ']]>' . '</category>';
+			if ( 'atom' == $type )
+			{
+				$final_url = '<category scheme="' . $scheme_url[ $term->taxonomy ] 
+					. '" term="' . $scheme_url[ $term->taxonomy ] . $term->slug 
+					. '" label="' . $term->name . '">' 
+					. '<![CDATA[' . $term->name . ']]>' . '</category>';
+			}
+			else 
+			{
+				$final_url = '<category domain="' . $scheme_url[ $term->taxonomy ] . '">' . '<![CDATA[' . $term->name . ']]>' . '</category>';
+			}
+			
 			$out .= $final_url;
 		}// end foreach
 
