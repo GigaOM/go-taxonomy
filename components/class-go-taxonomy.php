@@ -121,15 +121,24 @@ class GO_Taxonomy
 			// return in the rss in spec'd format:
 			if ( 'atom' == $type )
 			{
-				$categories .= sprintf( '<category scheme="%1$s" term="%2$s" label="%3$s" />', esc_attr( $scheme_url[ $term->taxonomy ] ), esc_attr( $term_link_url ), esc_attr( $term->name ) );
+				$categories .= sprintf( 
+					'<category scheme="%1$s" term="%2$s" label="%3$s"><![CDATA[%4$s]]></category>',
+					esc_url_raw( $scheme_url[ $term->taxonomy ] ),
+					esc_url_raw( $term_link_url ),
+					esc_attr( $term->name ),
+					esc_attr( $term->name )
+				);
 			}
 			elseif ( 'rdf' == $type )
 			{
-				$categories .= sprintf( '<dc:subject><![CDATA["%1$s"]]></dc:subject>', esc_attr( $term->name ) );
+				$categories .= sprintf( 
+					'<dc:subject><![CDATA["%1$s"]]></dc:subject>',
+					esc_attr( $term->name )
+				);
 			}
 			else 
 			{
-				$categories .= '<category domain="' . esc_attr( $scheme_url[ $term->taxonomy ] ) . '">' . '<![CDATA[' .esc_attr( $term->name ) . ']]>' . '</category>';
+				$categories .= '<category domain="' . esc_url_raw( $scheme_url[ $term->taxonomy ] ) . '">' . '<![CDATA[' . esc_html( $term->name ) . ']]>' . '</category>';
 			}
 		}// end foreach
 
