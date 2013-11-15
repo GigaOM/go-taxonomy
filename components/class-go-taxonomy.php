@@ -87,51 +87,53 @@ class GO_Taxonomy
 	 * @uses apply_filters() Calls 'the_category_rss' with category & type parameter
 	 * adds domain attributes to category element
 	 */
-	public function the_category_rss( $category, $type )
+	public function the_category_rss( $categories, $type )
 	{
 		// get the taxonomy from the post:
 		$post_id = get_the_ID();
 
 		if ( $post_id < 1 )
 		{	// get_the_ID returned a dodgy post ID for this item, return nothing:
-			return $category;
+			return $categories;
 		}
-
-		$out = '';
 
 		// get the taxonomies to find terms for, from current config:
 		$taxonomies = array_keys($this->config);
 		// use these to obtain term-taxonomy objects:
-		$term_taxonomies = wp_get_object_terms( $post_id, $taxonomies );
+		$terms = wp_get_object_terms( $post_id, $taxonomies );
 
-		if( empty( $term_taxonomies ) || is_wp_error( $term_taxonomies ) )
+		if( empty( $terms ) || is_wp_error( $terms ) )
 		{
-			return $category;
+			return $categories;
 		}
+		
+		// if we reach here, then rather than amending and/or returning existing $categories, we're going to rewrite them instead, due to issues with how WP is crafting the output:
+		$categories = '';
 
-		foreach( $term_taxonomies as $term )
+		foreach( $terms as $term )
 		{
 			if ( ! isset( $scheme_url[ $term->taxonomy ] ) )
 			{
-				$scheme_url[ $term->taxonomy ] = preg_replace( '#' . $term->slug . '/?#', '', get_term_link( $term )  );
+				$term_link_url = get_term_link( $term );
+				$scheme_url[ $term->taxonomy ] = preg_replace( '#' . $term->slug . '/?#', '', $term_link_url );
 			}
+
 			// return in the rss in spec'd format:
 			if ( 'atom' == $type )
 			{
-				$final_url = '<category scheme="' . $scheme_url[ $term->taxonomy ] 
-					. '" term="' . $scheme_url[ $term->taxonomy ] . $term->slug 
-					. '" label="' . $term->name . '">' 
-					. '<![CDATA[' . $term->name . ']]>' . '</category>';
+				$categories .= sprintf( '<category scheme="%1$s" term="%2$s" label="%3$s" />', esc_attr( $scheme_url[ $term->taxonomy ] ), esc_attr( $term_link_url ), esc_attr( $term->name ) );
+			}
+			elseif ( 'rdf' == $type )
+			{
+				$categories .= sprintf( '<dc:subject><![CDATA["%1$s"]]></dc:subject>', esc_attr( $term->name ) );
 			}
 			else 
 			{
-				$final_url = '<category domain="' . $scheme_url[ $term->taxonomy ] . '">' . '<![CDATA[' . $term->name . ']]>' . '</category>';
+				$categories .= '<category domain="' . esc_attr( $scheme_url[ $term->taxonomy ] ) . '">' . '<![CDATA[' .esc_attr( $term->name ) . ']]>' . '</category>';
 			}
-			
-			$out .= $final_url;
 		}// end foreach
 
-		return $out;
+		return $categories;
 	}//end the_category_rss
 }//end class
 
