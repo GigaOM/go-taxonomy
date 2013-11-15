@@ -84,8 +84,8 @@ class GO_Taxonomy
 	}//end count_compare
 
 	/**
-	 * @uses apply_filters() Calls 'the_category_rss' with category & type parameter
-	 * adds domain attributes to category element
+	 * @uses apply_filters() Calls 'the_category_rss' with categories & type parameter
+	 * adds domain (or scheme/label/term in case of atom) attributes to a category element in the rss output
 	 */
 	public function the_category_rss( $categories, $type )
 	{
