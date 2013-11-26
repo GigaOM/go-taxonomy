@@ -143,7 +143,7 @@ class GO_Taxonomy
 				$categories .= '<category domain="' . esc_url_raw( $scheme_url[ $term->taxonomy ] ) . '">' . '<![CDATA[' . esc_html( $term->name ) . ']]>' . '</category>';
 			}
 			$counter++;
-			$categories .= ( $counter >= $term_count ) ? "" : "r\n\t\t";
+			$categories .= ( $counter >= $term_count ) ? "" : "\n\t\t";
 		}// end foreach
 
 		return $categories;
