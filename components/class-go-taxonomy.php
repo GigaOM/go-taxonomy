@@ -109,6 +109,8 @@ class GO_Taxonomy
 		
 		// if we reach here, then rather than amending and/or returning existing $categories, we're going to rewrite them instead, due to issues with how WP is crafting the output:
 		$categories = '';
+		$term_count = count( $terms );
+		$counter = 0;
 
 		foreach( $terms as $term )
 		{
@@ -140,6 +142,8 @@ class GO_Taxonomy
 			{
 				$categories .= '<category domain="' . esc_url_raw( $scheme_url[ $term->taxonomy ] ) . '">' . '<![CDATA[' . esc_html( $term->name ) . ']]>' . '</category>';
 			}
+			$counter++;
+			$categories .= ( $counter >= $term_count ) ? "" : "r\n\t\t";
 		}// end foreach
 
 		return $categories;
