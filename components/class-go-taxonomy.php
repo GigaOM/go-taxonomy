@@ -109,8 +109,6 @@ class GO_Taxonomy
 		
 		// if we reach here, then rather than amending and/or returning existing $categories, we're going to rewrite them instead, due to issues with how WP is crafting the output:
 		$categories = '';
-		$term_count = count( $terms );
-		$counter = 0;
 
 		foreach( $terms as $term )
 		{
@@ -123,27 +121,25 @@ class GO_Taxonomy
 			// return in the rss in spec'd format:
 			if ( 'atom' == $type )
 			{
-				$categories .= sprintf( 
+				$categories .= "\t\t" . sprintf( 
 					'<category scheme="%1$s" term="%2$s" label="%3$s"><![CDATA[%4$s]]></category>',
 					esc_url_raw( $scheme_url[ $term->taxonomy ] ),
 					esc_url_raw( $term_link_url ),
 					esc_attr( $term->name ),
-					esc_attr( $term->name )
+					esc_attr( $term->name ) . "\n"
 				);
 			}
 			elseif ( 'rdf' == $type )
 			{
-				$categories .= sprintf( 
+				$categories .= "\t\t" . sprintf( 
 					'<dc:subject><![CDATA["%1$s"]]></dc:subject>',
-					esc_attr( $term->name )
+					esc_attr( $term->name ) . "\n"
 				);
 			}
 			else 
 			{
-				$categories .= '<category domain="' . esc_url_raw( $scheme_url[ $term->taxonomy ] ) . '">' . '<![CDATA[' . esc_html( $term->name ) . ']]>' . '</category>';
+				$categories .= "\t\t" . '<category domain="' . esc_url_raw( $scheme_url[ $term->taxonomy ] ) . '">' . '<![CDATA[' . esc_html( $term->name ) . ']]>' . "</category>\n";
 			}
-			$counter++;
-			$categories .= ( $counter >= $term_count ) ? "" : "\n\t\t";
 		}// end foreach
 
 		return $categories;
