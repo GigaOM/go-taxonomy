@@ -42,7 +42,7 @@ class GO_Taxonomy
 			return new WP_Error( 'invalid_config', 'GO_Taxonomy config is empty or malformed' );
 		}//end if
 
-		foreach ( $this->config as $slug => $taxonomy )
+		foreach ( $this->config['register_taxonomies'] as $slug => $taxonomy )
 		{
 			register_taxonomy(
 				$slug,
@@ -98,7 +98,7 @@ class GO_Taxonomy
 		}
 
 		// get the taxonomies to find terms for, from current config:
-		$taxonomies = array_keys($this->config);
+		$taxonomies = array_values( $this->config['the_category_rss_taxonomies'] );
 
 		// use these to obtain term-taxonomy objects:
 		$terms = wp_get_object_terms( $post_id, $taxonomies );
