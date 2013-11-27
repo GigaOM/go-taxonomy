@@ -99,6 +99,7 @@ class GO_Taxonomy
 
 		// get the taxonomies to find terms for, from current config:
 		$taxonomies = array_keys($this->config);
+
 		// use these to obtain term-taxonomy objects:
 		$terms = wp_get_object_terms( $post_id, $taxonomies );
 
@@ -122,7 +123,7 @@ class GO_Taxonomy
 			if ( 'atom' == $type )
 			{
 				$categories .= sprintf( 
-					'<category scheme="%1$s" term="%2$s" label="%3$s"><![CDATA[%4$s]]></category>',
+					'<category scheme="%1$s" term="%2$s" label="%3$s"><![CDATA[%4$s]]></category>' . "\n\t\t",
 					esc_url_raw( $scheme_url[ $term->taxonomy ] ),
 					esc_url_raw( $term_link_url ),
 					esc_attr( $term->name ),
@@ -132,13 +133,17 @@ class GO_Taxonomy
 			elseif ( 'rdf' == $type )
 			{
 				$categories .= sprintf( 
-					'<dc:subject><![CDATA["%1$s"]]></dc:subject>',
+					'<dc:subject><![CDATA["%1$s"]]></dc:subject>' . "\n\t\t",
 					esc_attr( $term->name )
 				);
 			}
 			else 
 			{
-				$categories .= '<category domain="' . esc_url_raw( $scheme_url[ $term->taxonomy ] ) . '">' . '<![CDATA[' . esc_html( $term->name ) . ']]>' . '</category>';
+				$categories .= sprintf( 
+					'<category domain="%1$s"><![CDATA[%2$s]]></category>' . "\n\t\t",
+					esc_url_raw( $scheme_url[ $term->taxonomy ] ),
+					esc_attr( $term->name )
+				);
 			}
 		}// end foreach
 
