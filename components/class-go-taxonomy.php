@@ -89,13 +89,18 @@ class GO_Taxonomy
 	 */
 	public function the_category_rss( $categories, $type )
 	{
+		if ( ! isset( $this->config['the_category_rss_taxonomies'] ) )
+		{
+			return $categories;
+		}//end if
+
 		// get the taxonomy from the post:
 		$post_id = get_the_ID();
 
 		if ( $post_id < 1 )
 		{	// get_the_ID returned a dodgy post ID for this item, return nothing:
 			return $categories;
-		}
+		}// end if
 
 		// get the taxonomies to find terms for, from current config:
 		$taxonomies = array_values( $this->config['the_category_rss_taxonomies'] );
@@ -103,11 +108,11 @@ class GO_Taxonomy
 		// use these to obtain term-taxonomy objects:
 		$terms = wp_get_object_terms( $post_id, $taxonomies );
 
-		if( empty( $terms ) || is_wp_error( $terms ) )
+		if ( empty( $terms ) || is_wp_error( $terms ) )
 		{
 			return $categories;
-		}
-		
+		}// end if
+
 		// if we reach here, then rather than amending and/or returning existing $categories, we're going to rewrite them instead, due to issues with how WP is crafting the output:
 		$categories = '';
 
@@ -117,34 +122,34 @@ class GO_Taxonomy
 			{
 				$term_link_url = get_term_link( $term );
 				$scheme_url[ $term->taxonomy ] = preg_replace( '#' . $term->slug . '/?#', '', $term_link_url );
-			}
+			}// end if
 
 			// return in the rss in spec'd format:
 			if ( 'atom' == $type )
 			{
-				$categories .= sprintf( 
+				$categories .= sprintf(
 					'<category scheme="%1$s" term="%2$s" label="%3$s"><![CDATA[%4$s]]></category>' . "\n\t\t",
 					esc_url_raw( $scheme_url[ $term->taxonomy ] ),
 					esc_url_raw( $term_link_url ),
 					esc_attr( $term->name ),
 					esc_attr( $term->name )
 				);
-			}
+			}// end if
 			elseif ( 'rdf' == $type )
 			{
-				$categories .= sprintf( 
+				$categories .= sprintf(
 					'<dc:subject><![CDATA["%1$s"]]></dc:subject>' . "\n\t\t",
 					esc_attr( $term->name )
 				);
-			}
-			else 
+			}// end elseif
+			else
 			{
-				$categories .= sprintf( 
+				$categories .= sprintf(
 					'<category domain="%1$s"><![CDATA[%2$s]]></category>' . "\n\t\t",
 					esc_url_raw( $scheme_url[ $term->taxonomy ] ),
 					esc_attr( $term->name )
 				);
-			}
+			}//end else
 		}// end foreach
 
 		return $categories;
