@@ -37,7 +37,7 @@ class GO_Taxonomy
 	 */
 	public function register()
 	{
-		if ( ! $this->config['register_taxonomies'] || ! is_array( $this->config['register_taxonomies'] ) )
+		if ( ! isset ( $this->config['register_taxonomies'] ) || ! is_array( $this->config['register_taxonomies'] || ! $this->config['register_taxonomies'] ) )
 		{
 			return new WP_Error( 'invalid_config', 'GO_Taxonomy config is empty or malformed' );
 		}//end if
