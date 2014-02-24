@@ -119,9 +119,10 @@ class GO_Taxonomy
 
 		foreach( $terms as $term )
 		{
-			if ( ! isset( $scheme_url[ $term->taxonomy ] ) )
+			$term_link_url = get_term_link( $term );
+
+			if ( ! isset( $scheme_url[ $term->taxonomy ][ $term->slug ] ) )
 			{
-				$term_link_url = get_term_link( $term );
 				$scheme_url[ $term->taxonomy ] = preg_replace( '#' . $term->slug . '/?#', '', $term_link_url );
 			}// end if
 
