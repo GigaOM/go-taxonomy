@@ -6,8 +6,9 @@ class GO_Taxonomy
 
 	public function __construct()
 	{
-		add_action( 'init', array( $this, 'init' ), 1 );
 		$this->config( apply_filters( 'go_config', false, 'go-taxonomy' ) );
+		
+		add_action( 'init', array( $this, 'init' ), 1 );
 		add_filter( 'the_category_rss', array( $this, 'the_category_rss' ), 10, 2 );
 	}//end __construct
 
@@ -85,8 +86,10 @@ class GO_Taxonomy
 	}//end count_compare
 
 	/**
-	 * @uses apply_filters() Calls 'the_category_rss' with categories & type parameter
-	 * adds domain (or scheme/label/term in case of atom) attributes to a category element in the rss output
+	 * Hooks to the_category_rss filter hook and returns new category/subject meta with scheme/domain/term depending on feed type
+	 *
+	 * @param string $categories The existing category meta for hte post
+	 * @param string $type The type of feed being generated (i.e. atom, rdf, rss2 )
 	 */
 	public function the_category_rss( $categories, $type )
 	{
@@ -156,6 +159,119 @@ class GO_Taxonomy
 
 		return $categories;
 	}//end the_category_rss
+
+	/**
+	 * Returns terms for a post sorted by name or by term usage (i.e. count)
+	 *
+	 * @param int $post_id The ID of the post you want sorted terms for
+	 * @param array $args Array of parameters for the function
+	 */
+	public function sorted_terms( $post_id = NULL, $args = array() )
+	{
+		if ( ! $post_id && $post = get_post() )
+		{
+			$post_id = $post->ID;
+		} // END if
+
+		if ( ! $post_id )
+		{
+			return FALSE;
+		} // END if
+
+		$defaults = array(
+			'taxonomies' => array( 'post_tag' ),
+			'number'     => 99,
+			'format'     => 'list',
+			'orderby'    => 'name',
+			'order'      => 'ASC',
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		// Get the terms
+		$terms = wp_get_object_terms( $post_id, $args['taxonomies'] );
+
+		// Allow terms to be filtered by other scripts
+		$terms = apply_filters( 'go_taxonomy_sorted_terms_pre', $terms, $post_id );
+
+		if ( ! $terms )
+		{
+			switch ( $args['format'] )
+			{
+				case 'array' :
+					return array();
+					break;
+				default :
+					return '';
+			}//end switch
+		}//end if
+
+		$counts = array();
+		foreach ( $terms as $term )
+		{
+			$counts[ $term->slug ]   = $term->count;
+			$term_info[ $term->slug ] = $term;
+		}//end foreach
+
+		if ( ! $counts )
+		{
+			return;
+		}//end if
+
+		asort( $counts );
+
+		if ( $args['number'] > 0 )
+		{
+			$counts = array_slice( $counts, -$args['number'], $args['number'], TRUE );
+		}//end if
+
+		// SQL cannot save you; this is a second (potentially different) sort on a subset of data.
+		if ( 'name' == $args['orderby'] ) // name sort
+		{
+			uksort( $counts, 'strnatcasecmp' );
+		}// end if
+		else // sort by term count
+		{
+			asort( $counts );
+		}// end else
+
+		if ( 'DESC' == $args['order'] )
+		{
+			$counts = array_reverse( $counts, TRUE );
+		}//end if
+
+		// Allow sorted terms to be filtered by other scripts
+		$counts = apply_filters( 'go_taxonomy_sorted_terms', $counts, $post_id );
+
+		$a     = array();
+		$names = array();
+
+		foreach ( $counts as $term => $count )
+		{
+			$link = get_term_link( $term, $term_info[ $term ]->taxonomy );
+
+			// This is a fix for a weird bug on VIP where pages that call this method sometimes fail to load
+			if ( is_wp_error( $link ) )
+			{
+				continue;
+			}
+
+			$a[]     = '<a href="' . esc_url( $link ) . '" title="' . esc_attr( $term_info[ $term ]->name ) . '">' . stripslashes( wp_filter_nohtml_kses( $term_info[ $term ]->name ) ) . '</a>';
+			$names[] = $term_info[ $tag ]->name;
+		}//end foreach
+
+		switch ( $args['format'] )
+		{
+			case 'array' :
+				return $a;
+				break;
+			case 'name' :
+				return $names;
+				break;
+			default :
+				return "<ul class='breadcrumbs sorted_tags' itemprop='keywords'>\n\t<li>" . join( "</li>\n\t<li>", $a ) . "</li>\n</ul>\n";
+		}//end switch
+	}//end sorted_terms
 }//end class
 
 function go_taxonomy()
