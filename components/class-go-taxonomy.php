@@ -10,7 +10,7 @@ class GO_Taxonomy
 
 		add_action( 'init', array( $this, 'init' ), 1 );
 		add_filter( 'the_category_rss', array( $this, 'the_category_rss' ), 10, 2 );
-		add_filter( 'go_taxonomy_post_sorted_terms', array( $this, 'post_sorted_terms' ), 1, 3 );
+		add_filter( 'go_taxonomy_sorted_terms', array( $this, 'sorted_terms_filter' ), 1, 3 );
 	}//end __construct
 
 	/**
@@ -277,7 +277,7 @@ class GO_Taxonomy
 	/**
 	 * Returns sorted tags for a post
 	 */
-	public function post_sorted_terms( $terms, $post, $args )
+	public function sorted_terms_filter( $terms, $post, $args )
 	{
 		if ( ! $post )
 		{
@@ -285,7 +285,7 @@ class GO_Taxonomy
 		}//end if
 
 		return $go_post->sorted_tags( $post->ID, $args );
-	}//end post_sorted_terms
+	}//end sorted_terms_filter
 }//end class
 
 function go_taxonomy()
