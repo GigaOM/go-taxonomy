@@ -189,8 +189,14 @@ class GO_Taxonomy
 
 		$args = wp_parse_args( $args, $defaults );
 
+		$hash = md5( $post_id . serialize( $args ) );
+
 		// Get the terms
-		$terms = wp_get_object_terms( $post_id, $args['taxonomies'] );
+		if ( ! $terms = wp_cache_get( $hash, 'go-taxonomy' ) )
+		{
+			$terms = wp_get_object_terms( $post_id, $args['taxonomies'] );
+			wp_cache_set( $hash, $terms, 'go-taxonomy', $expire );
+		} // END if
 
 		// Allow terms to be filtered by other scripts
 		$terms = apply_filters( 'go_taxonomy_sorted_terms_pre', $terms, $post_id );
