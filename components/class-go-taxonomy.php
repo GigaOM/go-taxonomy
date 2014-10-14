@@ -242,7 +242,7 @@ class GO_Taxonomy
 		}//end if
 
 		// Allow sorted terms to be filtered by other scripts
-		$counts = apply_filters( 'go_taxonomy_sorted_terms', $counts, $post_id );
+		$counts = apply_filters( 'go_taxonomy_sorted_terms_post', $counts, $post_id );
 
 		$a     = array();
 		$names = array();
