@@ -7,9 +7,10 @@ class GO_Taxonomy
 	public function __construct()
 	{
 		$this->config( apply_filters( 'go_config', false, 'go-taxonomy' ) );
-		
+
 		add_action( 'init', array( $this, 'init' ), 1 );
 		add_filter( 'the_category_rss', array( $this, 'the_category_rss' ), 10, 2 );
+		add_filter( 'go_taxonomy_post_sorted_terms', array( $this, 'post_sorted_terms' ), 1, 3 );
 	}//end __construct
 
 	/**
@@ -272,6 +273,19 @@ class GO_Taxonomy
 				return "<ul class='breadcrumbs sorted_tags' itemprop='keywords'>\n\t<li>" . join( "</li>\n\t<li>", $a ) . "</li>\n</ul>\n";
 		}//end switch
 	}//end sorted_terms
+
+	/**
+	 * Returns sorted tags for a post
+	 */
+	public function post_sorted_terms( $terms, $post, $args )
+	{
+		if ( ! $post )
+		{
+			return $terms;
+		}//end if
+
+		return $go_post->sorted_tags( $post->ID, $args );
+	}//end post_sorted_terms
 }//end class
 
 function go_taxonomy()
