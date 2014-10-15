@@ -179,6 +179,8 @@ class GO_Taxonomy
 			return FALSE;
 		} // END if
 
+		$post = get_post( $post_id );
+
 		$defaults = array(
 			'taxonomies' => array( 'post_tag' ),
 			'number'     => 99,
@@ -191,12 +193,25 @@ class GO_Taxonomy
 
 		$hash = md5( $post_id . serialize( $args ) );
 
+		// Check the terms cache if it exists and update it if necessary
+		if ( $cache = wp_cache_get( $hash, 'go-taxonomy-terms' ) )
+		{
+			if ( ! isset( $cache['cache_time'] ) || $post->post_updated_gmt > $cache['cache_time'] )
+			{
+				wp_cache_delete( $hash, 'go-taxonomy-terms' );
+			} // END if
+		} // END if
+
 		// Get the terms
 		if ( ! $terms = wp_cache_get( $hash, 'go-taxonomy-terms' ) )
 		{
 			$terms = wp_get_object_terms( $post_id, $args['taxonomies'] );
+
+			$terms['cache_time'] = current_time( 'mysql', 1 );
 			wp_cache_set( $hash, $terms, 'go-taxonomy-terms' );
 		} // END if
+
+		unset( $terms['cache_time'] );
 
 		// Allow terms to be filtered by other scripts
 		$terms = apply_filters( 'go_taxonomy_sorted_terms_pre', $terms, $post_id );
