@@ -192,10 +192,10 @@ class GO_Taxonomy
 		$hash = md5( $post_id . serialize( $args ) );
 
 		// Get the terms
-		if ( ! $terms = wp_cache_get( $hash, 'go-taxonomy' ) )
+		if ( ! $terms = wp_cache_get( $hash, 'go-taxonomy-terms' ) )
 		{
 			$terms = wp_get_object_terms( $post_id, $args['taxonomies'] );
-			wp_cache_set( $hash, $terms, 'go-taxonomy', $expire );
+			wp_cache_set( $hash, $terms, 'go-taxonomy-terms' );
 		} // END if
 
 		// Allow terms to be filtered by other scripts
