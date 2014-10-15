@@ -199,20 +199,18 @@ class GO_Taxonomy
 		{
 			if ( ! isset( $cache['cache_time'] ) || $post->post_updated_gmt > $cache['cache_time'] )
 			{
+				// The cache was invalid so we delete it and continue
 				wp_cache_delete( $hash, 'go-taxonomy-terms' );
 			} // END if
+			else
+			{
+				// The cache was valid so we return it
+				return $cache['terms'];
+			} // END else
 		} // END if
 
 		// Get the terms
-		if ( ! $terms = wp_cache_get( $hash, 'go-taxonomy-terms' ) )
-		{
-			$terms = wp_get_object_terms( $post_id, $args['taxonomies'] );
-
-			$terms['cache_time'] = current_time( 'mysql', 1 );
-			wp_cache_set( $hash, $terms, 'go-taxonomy-terms' );
-		} // END if
-
-		unset( $terms['cache_time'] );
+		$terms = wp_get_object_terms( $post_id, $args['taxonomies'] );
 
 		// Allow terms to be filtered by other scripts
 		$terms = apply_filters( 'go_taxonomy_sorted_terms_pre', $terms, $post_id );
@@ -280,20 +278,27 @@ class GO_Taxonomy
 			}
 
 			$a[]     = '<a href="' . esc_url( $link ) . '" title="' . esc_attr( $term_info[ $term ]->name ) . '">' . stripslashes( wp_filter_nohtml_kses( $term_info[ $term ]->name ) ) . '</a>';
-			$names[] = $term_info[ $tag ]->name;
+			$names[] = $term_info[ $term ]->name;
 		}//end foreach
+
+		$cache = array();
 
 		switch ( $args['format'] )
 		{
 			case 'array' :
-				return $a;
+				$cache['terms'] = $a;
 				break;
 			case 'name' :
-				return $names;
+				$cache['terms'] = $names;
 				break;
 			default :
-				return "<ul class='breadcrumbs sorted_tags' itemprop='keywords'>\n\t<li>" . join( "</li>\n\t<li>", $a ) . "</li>\n</ul>\n";
+				$cache['terms'] = "<ul class='breadcrumbs sorted_tags' itemprop='keywords'>\n\t<li>" . join( "</li>\n\t<li>", $a ) . "</li>\n</ul>\n";
 		}//end switch
+
+		$cache['cache_time'] = current_time( 'mysql', 1 );
+		wp_cache_set( $hash, $cache, 'go-taxonomy-terms' );
+
+		return $cache['terms'];
 	}//end sorted_terms
 
 	/**
