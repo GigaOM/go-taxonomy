@@ -103,7 +103,8 @@ class GO_Taxonomy
 		$post_id = get_the_ID();
 
 		if ( $post_id < 1 )
-		{	// get_the_ID returned a dodgy post ID for this item, return nothing:
+		{
+			// get_the_ID returned a dodgy post ID for this item, return nothing:
 			return $categories;
 		}// end if
 
@@ -121,7 +122,7 @@ class GO_Taxonomy
 		// if we reach here, then rather than amending and/or returning existing $categories, we're going to rewrite them instead, due to issues with how WP is crafting the output:
 		$categories = '';
 
-		foreach( $terms as $term )
+		foreach ( $terms as $term )
 		{
 			$term_link_url = get_term_link( $term );
 
