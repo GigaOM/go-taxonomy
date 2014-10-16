@@ -226,7 +226,8 @@ class GO_Taxonomy
 					return '';
 			}//end switch
 		}//end if
-
+		
+		// @TODO Split this out into a seperate method so term sorting can be done independent of a post
 		$counts = array();
 		foreach ( $terms as $term )
 		{
