@@ -197,7 +197,7 @@ class GO_Taxonomy
 		// Check the terms cache if it exists and update it if necessary
 		if ( $cache = wp_cache_get( $hash, 'go-taxonomy-terms' ) )
 		{
-			if ( ! isset( $cache['cache_time'] ) || strtotime( $post->post_updated_gmt ) > strtotime( $cache['cache_time'] ) )
+			if ( ! isset( $cache['cache_time'] ) || mysql2date( 'U', $post->post_updated_gmt ) > $cache['cache_time'] )
 			{
 				// The cache was invalid so we delete it and continue
 				wp_cache_delete( $hash, 'go-taxonomy-terms' );
@@ -296,7 +296,7 @@ class GO_Taxonomy
 				$cache['terms'] = "<ul class='breadcrumbs sorted_tags' itemprop='keywords'>\n\t<li>" . join( "</li>\n\t<li>", $a ) . "</li>\n</ul>\n";
 		}//end switch
 
-		$cache['cache_time'] = current_time( 'mysql', 1 );
+		$cache['cache_time'] = time();
 		wp_cache_set( $hash, $cache, 'go-taxonomy-terms' );
 
 		return $cache['terms'];
