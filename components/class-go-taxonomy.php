@@ -307,6 +307,7 @@ class GO_Taxonomy
 	 */
 	public function sorted_terms_filter( $terms, $post, $args )
 	{
+		// @TODO Once the sort stuff has been split out of the sorted_terms method this won't need to check for a post anymore
 		if ( ! $post )
 		{
 			return $terms;
