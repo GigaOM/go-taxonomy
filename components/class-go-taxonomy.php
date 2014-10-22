@@ -313,7 +313,8 @@ class GO_Taxonomy
 			return $terms;
 		}//end if
 
-		return $go_post->sorted_tags( $post->ID, $args );
+		$go_post = new GO_Theme_Post( $post );
+		return $go_post->sorted_tags( $args );
 	}//end sorted_terms_filter
 }//end class
 
