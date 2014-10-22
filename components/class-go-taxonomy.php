@@ -313,6 +313,7 @@ class GO_Taxonomy
 			return $terms;
 		}//end if
 
+		// @TODO These taxonomies should really get pulled via a config somehow, but doing it this way to get a fix out quickly
 		$defaults = array(
 			'taxonomies' => array(
 				'technology',
