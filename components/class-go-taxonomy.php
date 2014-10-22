@@ -226,7 +226,7 @@ class GO_Taxonomy
 					return '';
 			}//end switch
 		}//end if
-		
+
 		// @TODO Split this out into a seperate method so term sorting can be done independent of a post
 		$counts = array();
 		foreach ( $terms as $term )
@@ -313,7 +313,23 @@ class GO_Taxonomy
 			return $terms;
 		}//end if
 
-		return $go_post->sorted_tags( $post->ID, $args );
+		// @TODO These taxonomies should really get pulled via a config somehow, but doing it this way to get a fix out quickly
+		$defaults = array(
+			'taxonomies' => array(
+				'technology',
+				'company',
+				'post_tag',
+				'person',
+			),
+			'number'  => 99,
+			'format'  => 'list',
+			'orderby' => 'name',
+			'order'   => 'ASC',
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		return $this->sorted_terms( $post->ID, $args );
 	}//end sorted_terms_filter
 }//end class
 
