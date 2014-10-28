@@ -227,50 +227,106 @@ class GO_Taxonomy
 			}//end switch
 		}//end if
 
-		// @TODO Split this out into a seperate method so term sorting can be done independent of a post
-		$counts = array();
-		foreach ( $terms as $term )
-		{
-			$counts[ $term->slug ]   = $term->count;
-			$term_info[ $term->slug ] = $term;
-		}//end foreach
-
-		if ( ! $counts )
-		{
-			return;
-		}//end if
-
-		asort( $counts );
+		usort( $terms, array( $this, 'sort_by_count_asc' ) );
 
 		if ( $args['number'] > 0 )
 		{
-			$counts = array_slice( $counts, -$args['number'], $args['number'], TRUE );
+			$terms = array_slice( $terms, -$args['number'], $args['number'], TRUE );
 		}//end if
 
 		// SQL cannot save you; this is a second (potentially different) sort on a subset of data.
 		if ( 'name' == $args['orderby'] ) // name sort
 		{
-			uksort( $counts, 'strnatcasecmp' );
+			usort( $terms, array( $this, 'sort_by_slug' ) );
 		}// end if
-		else // sort by term count
-		{
-			asort( $counts );
-		}// end else
 
 		if ( 'DESC' == $args['order'] )
 		{
-			$counts = array_reverse( $counts, TRUE );
+			$terms = array_reverse( $terms, TRUE );
 		}//end if
 
 		// Allow sorted terms to be filtered by other scripts
-		$counts = apply_filters( 'go_taxonomy_sorted_terms_post', $counts, $post_id );
+		$terms = apply_filters( 'go_taxonomy_sorted_terms_post', $terms, $post_id );
 
+		$cache = array();
+
+		$cache['terms'] = $this->format_terms( $terms, $args['format'] );
+
+		$cache['cache_time'] = time();
+		wp_cache_set( $hash, $cache, 'go-taxonomy-terms' );
+
+		return $cache['terms'];
+	}//end sorted_terms
+
+	/**
+	 * Sort terms by slug ASC
+	 */
+	public function sort_by_slug( $a, $b )
+	{
+		if ( $a->slug == $b->slug )
+		{
+			return 0;
+		}//end if
+
+		return $a->slug < $b->slug ? -1 : 1;
+	}//end sort_by_slug
+
+	/**
+	 * Sort terms by count ASC
+	 */
+	public function sort_by_count_asc( $a, $b )
+	{
+		if ( $a->count == $b->count )
+		{
+			return 0;
+		}//end if
+
+		return $a->count < $b->count ? -1 : 1;
+	}//end sort_by_count_asc
+
+	/**
+	 * Sort terms by count DESC
+	 */
+	public function sort_by_count_desc( $a, $b )
+	{
+		if ( $a->count == $b->count )
+		{
+			return 0;
+		}//end if
+
+		return $a->count > $b->count ? -1 : 1;
+	}//end sort_by_count_desc
+
+	/**
+	 * formats terms
+	 */
+	public function format_terms( $terms, $format )
+	{
 		$a     = array();
 		$names = array();
 
-		foreach ( $counts as $term => $count )
+		// if we want the objects...well, they should already be objects
+		if ( 'object' == $format )
 		{
-			$link = get_term_link( $term, $term_info[ $term ]->taxonomy );
+			return $terms;
+		}//end if
+
+		if ( ! $terms )
+		{
+			switch ( $format )
+			{
+				case 'array' :
+				case 'name' :
+					return array();
+					break;
+				default :
+					return '';
+			}//end switch
+		}//end if
+
+		foreach ( $terms as $term )
+		{
+			$link = get_term_link( $term->slug, $term->taxonomy );
 
 			// This is a fix for a weird bug on VIP where pages that call this method sometimes fail to load
 			if ( is_wp_error( $link ) )
@@ -278,29 +334,22 @@ class GO_Taxonomy
 				continue;
 			}
 
-			$a[]     = '<a href="' . esc_url( $link ) . '" title="' . esc_attr( $term_info[ $term ]->name ) . '">' . stripslashes( wp_filter_nohtml_kses( $term_info[ $term ]->name ) ) . '</a>';
-			$names[] = $term_info[ $term ]->name;
+			$a[]     = '<a href="' . esc_url( $link ) . '" title="' . esc_attr( $term->name ) . '">' . stripslashes( wp_filter_nohtml_kses( $term->name ) ) . '</a>';
+			$names[] = $term->name;
 		}//end foreach
 
-		$cache = array();
-
-		switch ( $args['format'] )
+		switch ( $format )
 		{
 			case 'array' :
-				$cache['terms'] = $a;
+				return $a;
 				break;
 			case 'name' :
-				$cache['terms'] = $names;
+				return $names;
 				break;
 			default :
-				$cache['terms'] = "<ul class='breadcrumbs sorted_tags' itemprop='keywords'>\n\t<li>" . join( "</li>\n\t<li>", $a ) . "</li>\n</ul>\n";
+				return "<ul class='breadcrumbs sorted_tags' itemprop='keywords'>\n\t<li>" . join( "</li>\n\t<li>", $a ) . "</li>\n</ul>\n";
 		}//end switch
-
-		$cache['cache_time'] = time();
-		wp_cache_set( $hash, $cache, 'go-taxonomy-terms' );
-
-		return $cache['terms'];
-	}//end sorted_terms
+	}//end format_terms
 
 	/**
 	 * Returns sorted tags for a post
