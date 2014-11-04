@@ -109,7 +109,11 @@ class GO_Taxonomy
 	 */
 	public function the_category_rss( $categories, $type )
 	{
-		if ( ! isset( $this->config['the_category_rss_taxonomies'] ) )
+		// Determine if we have some taxonomies to work with
+		$taxonomies = isset( $this->config['the_category_rss_taxonomies'] ) ? $this->config['the_category_rss_taxonomies'] : array();
+		$taxonomies = apply_filters( 'go_taxonomy_rss_taxonomies', $taxonomies, $type );
+
+		if ( empty( $taxonomies ) )
 		{
 			return $categories;
 		}//end if
@@ -123,11 +127,8 @@ class GO_Taxonomy
 			return $categories;
 		}// end if
 
-		// get the taxonomies to find terms for, from current config:
-		$taxonomies = array_values( $this->config['the_category_rss_taxonomies'] );
-
 		// use these to obtain term-taxonomy objects:
-		$terms = wp_get_object_terms( $post_id, $taxonomies );
+		$terms = wp_get_object_terms( $post_id, array_values( $taxonomies ) );
 
 		if ( empty( $terms ) || is_wp_error( $terms ) )
 		{
