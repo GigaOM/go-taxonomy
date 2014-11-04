@@ -9,6 +9,7 @@ class GO_Taxonomy
 		$this->config( apply_filters( 'go_config', false, 'go-taxonomy' ) );
 
 		add_action( 'init', array( $this, 'init' ), 1 );
+		add_action( 'registered_taxonomy', array( $this, 'registered_taxonomy' ) );
 		add_filter( 'the_category_rss', array( $this, 'the_category_rss' ), 10, 2 );
 		add_filter( 'go_taxonomy_sorted_terms', array( $this, 'sorted_terms_filter' ), 1, 3 );
 	}//end __construct
@@ -33,6 +34,20 @@ class GO_Taxonomy
 	{
 		$this->register();
 	}//end init
+
+	/**
+	 * Hook into the registered_taxonomy action and do things on a per taxonomy basis (like hide a taxonomy)
+	 */
+	public function registered_taxonomy( $taxonomy )
+	{
+		global $wp_taxonomies;
+
+		// Hide taxonomies
+		if ( in_array( $taxonomy, $this->config['taxonomies_to_hide'] ) )
+		{
+			$wp_taxonomies[ $taxonomy ]->show_ui = FALSE;
+		} // END if
+	} // END registered_taxonomy
 
 	/**
 	 * register taxonomies based on config data
@@ -94,7 +109,11 @@ class GO_Taxonomy
 	 */
 	public function the_category_rss( $categories, $type )
 	{
-		if ( ! isset( $this->config['the_category_rss_taxonomies'] ) )
+		// Determine if we have some taxonomies to work with
+		$taxonomies = isset( $this->config['the_category_rss_taxonomies'] ) ? $this->config['the_category_rss_taxonomies'] : array();
+		$taxonomies = apply_filters( 'go_taxonomy_rss_taxonomies', $taxonomies, $type );
+
+		if ( empty( $taxonomies ) )
 		{
 			return $categories;
 		}//end if
@@ -108,11 +127,8 @@ class GO_Taxonomy
 			return $categories;
 		}// end if
 
-		// get the taxonomies to find terms for, from current config:
-		$taxonomies = array_values( $this->config['the_category_rss_taxonomies'] );
-
 		// use these to obtain term-taxonomy objects:
-		$terms = wp_get_object_terms( $post_id, $taxonomies );
+		$terms = wp_get_object_terms( $post_id, array_values( $taxonomies ) );
 
 		if ( empty( $terms ) || is_wp_error( $terms ) )
 		{
