@@ -135,10 +135,9 @@ class GO_Taxonomy
 			if ( 'atom' == $type )
 			{
 				$categories .= sprintf(
-					'<category scheme="%1$s" term="%2$s" label="%3$s"><![CDATA[%4$s]]></category>' . "\n\t\t",
+					'<category scheme="%1$s" term="%2$s" label="%3$s"/>' . "\n\t\t",
 					esc_url_raw( $scheme_url[ $term->taxonomy ] ),
 					esc_url_raw( $term_link_url ),
-					esc_attr( $term->name ),
 					esc_attr( $term->name )
 				);
 			}// end if
