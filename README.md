@@ -18,19 +18,19 @@ The plugin also provides workarounds for limitations in WordPress handling of te
 ### Sorted Terms ###
 
 There's also a `sorted_terms` helper function you can use in plugins and templates like this:
-		
+
 ```php
 go_taxonomy()->sorted_terms( $post_id, $args );
 ```
 
 ### Parameters ###
 
-**$post_id** 
+**$post_id**
 
 _(int) (optional)_ The ID of the post you want to get sorted terms for
 
 ### Argument Options ###
-	
+
 **taxonomies**
 
 _(array)_

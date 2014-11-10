@@ -56,7 +56,8 @@ passthru( "git submodule foreach 'git checkout-index -a -f --prefix=$svn_repo_pa
 echo '
 building readme.txt out of README.md
 ';
-passthru( "php github-readme-to-wporg.php " . $svn_repo_path );
+$readme_content = include __DIR__ . '/github-readme-to-wporg.php';
+file_put_contents( $svn_repo_path . '/readme.txt', $readme_content );
 
 echo '
 Setting svn:ignore properties
