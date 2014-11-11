@@ -79,55 +79,55 @@ https://github.com/GigaOM/go-taxonomy/
 1. Add a filter on the `go_config` hook that returns an array of taxonomies when the the 2nd paramter is `go-taxonomy`
 2. Config array format example:
 
-	```php
-	array(
-		'register_taxonomies' => array(
-			'company' => array(
-				'object_type' => 'post',
-				'args' => array(
-					'label'     => 'Companies',
-					'query_var' => TRUE,
-					'rewrite'   => array(
-						'slug'    => 'company',
-						'with_front' => TRUE,
-						'ep_mask' => EP_TAGS,
-					),
-					'show_ui'   => TRUE,
+```php
+array(
+	'register_taxonomies' => array(
+		'company' => array(
+			'object_type' => 'post',
+			'args' => array(
+				'label'     => 'Companies',
+				'query_var' => TRUE,
+				'rewrite'   => array(
+					'slug'    => 'company',
+					'with_front' => TRUE,
+					'ep_mask' => EP_TAGS,
 				),
-			),
-			'person' => array(
-				'object_type' => 'post',
-				'args' => array(
-					'label'     => 'People',
-					'query_var' => TRUE,
-					'rewrite'   => array(
-						'slug'    => 'person',
-						'with_front' => TRUE,
-						'ep_mask' => EP_TAGS,
-					),
-					'show_ui'   => TRUE,
-				),
-			),
-			'technology' => array(
-				'object_type' => 'post',
-				'args' => array(
-					'label'     => 'Technologies and Products',
-					'query_var' => TRUE,
-					'rewrite'   => array(
-						'slug'    => 'technology',
-						'with_front' => TRUE,
-						'ep_mask' => EP_TAGS,
-					),
-					'show_ui'   => TRUE,
-				),
+				'show_ui'   => TRUE,
 			),
 		),
-		// Taxonomies you want returned as category meta in feeds
-		'the_category_rss_taxonomies' => array(
-			'post_tag',
-			'company',
-			'person',
-			'technology',
+		'person' => array(
+			'object_type' => 'post',
+			'args' => array(
+				'label'     => 'People',
+				'query_var' => TRUE,
+				'rewrite'   => array(
+					'slug'    => 'person',
+					'with_front' => TRUE,
+					'ep_mask' => EP_TAGS,
+				),
+				'show_ui'   => TRUE,
+			),
 		),
-	);
-	```
+		'technology' => array(
+			'object_type' => 'post',
+			'args' => array(
+				'label'     => 'Technologies and Products',
+				'query_var' => TRUE,
+				'rewrite'   => array(
+					'slug'    => 'technology',
+					'with_front' => TRUE,
+					'ep_mask' => EP_TAGS,
+				),
+				'show_ui'   => TRUE,
+			),
+		),
+	),
+	// Taxonomies you want returned as category meta in feeds
+	'the_category_rss_taxonomies' => array(
+		'post_tag',
+		'company',
+		'person',
+		'technology',
+	),
+);
+```

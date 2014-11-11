@@ -74,4 +74,7 @@ if ( preg_match_all( '/```[a-z]+(?!`)\n/m', $readme_content, $matches, PREG_OFFS
 	} // END foreach
 } // END if
 
+// Fix code comments further so the terrible WP markdown parser doesn't choke
+$readme_content = str_replace( '```', '`', $readme_content );
+
 return $readme_content;
