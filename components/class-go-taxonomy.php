@@ -111,7 +111,7 @@ class GO_Taxonomy
 	{
 		// Determine if we have some taxonomies to work with
 		$taxonomies = isset( $this->config['the_category_rss_taxonomies'] ) ? $this->config['the_category_rss_taxonomies'] : array();
-		$taxonomies = apply_filters( 'go_taxonomy_rss_taxonomies', $taxonomies, $type );
+		$taxonomies = apply_filters( 'go_taxonomy_rss_taxonomies', $taxonomies );
 
 		if ( empty( $taxonomies ) )
 		{
